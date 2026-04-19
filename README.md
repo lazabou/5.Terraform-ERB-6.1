@@ -1,8 +1,8 @@
 # Terraform Apstra — ERB 6.1
 
-Provisionnement automatisé d'un fabric datacenter Juniper via [Juniper Apstra](https://www.juniper.net/us/en/products/network-automation/apstra.html) et Terraform.
+Automated provisioning of a Juniper datacenter fabric via [Juniper Apstra](https://www.juniper.net/us/en/products/network-automation/apstra.html) and Terraform.
 
-## Topologie déployée
+## Deployed Topology
 
 ```
                     ┌─────────┐   ┌─────────┐
@@ -19,79 +19,83 @@ Provisionnement automatisé d'un fabric datacenter Juniper via [Juniper Apstra](
            └─────┘                          └─────────────┘
 ```
 
-| Rôle          | Modèle     | Quantité |
-|---------------|------------|----------|
-| Spine         | QFX5200    | 2        |
-| Border Leaf   | QFX10002-36Q | 2      |
-| Compute Leaf  | QFX5120-48Y  | 2      |
+| Role          | Model        | Count |
+|---------------|--------------|-------|
+| Spine         | QFX5200      | 2     |
+| Border Leaf   | QFX10002-36Q | 2     |
+| Compute Leaf  | QFX5120-48Y  | 2     |
 
-**Overlay** : EVPN / VXLAN — contrôle via Apstra
+**Overlay**: EVPN / VXLAN — managed by Apstra
 
-## Prérequis
+## Prerequisites
 
 - Terraform ≥ 1.0
-- Accès réseau à l'instance Apstra
+- Network access to the Apstra instance
 - Apstra ≥ 5.0 (provider `Juniper/apstra` v0.98.0)
 
-## Démarrage rapide
+## Quick Start
 
-### 1. Initialisation
+### 1. Initialize
 
 ```bash
 terraform init
 ```
 
-### 2. Credentials Apstra
+### 2. Apstra Credentials
 
-Créer un fichier `terraform.secrets.tfvars` (ignoré par git) :
+Create a `terraform.secrets.tfvars` file (excluded from git):
 
 ```hcl
 apstra_url = "https://<user>:<password>@<apstra-ip>"
 ```
 
-### 3. Plan et déploiement
+### 3. Plan and Deploy
 
 ```bash
 terraform plan    -var-file="terraform.secrets.tfvars"
 terraform apply   -var-file="terraform.secrets.tfvars"
 ```
 
-### 4. Destruction
+### 4. Destroy
 
 ```bash
 terraform destroy -var-file="terraform.secrets.tfvars"
 ```
 
-## Structure des fichiers
+## File Structure
 
-| Fichier | Rôle |
-|---------|------|
-| `apstra.tf` | Configuration du provider Apstra |
-| `resources.tf` | Pools de ressources (ASN, IPv4 loopback/link, VNI) |
-| `logical-device-interface-maps.tf` | Logical devices et interface maps (leaf / border / spine) |
-| `racks.tf` | Types de racks (compute et border) |
-| `template.tf` | Template rack-based du blueprint |
-| `blueprint.tf` | Blueprint, allocation des devices et déploiement |
-| `erb_vrf.tf` | VRFs (Routing Zones) et Connectivity Templates default route |
-| `erb_vn.tf` | Virtual Networks (VXLANs) et Connectivity Templates tagged |
-| `generic-systems.tf` | Generic systems (serveurs, firewall) avec LAG LACP |
-| `terraform.tfvars` | Valeurs : VRFs, VNs, generic systems |
+| File | Purpose |
+|------|---------|
+| `apstra.tf` | Apstra provider configuration |
+| `resources.tf` | Resource pools (ASN, IPv4 loopback/link, VNI) |
+| `logical-device-interface-maps.tf` | Logical devices and interface maps (leaf / border / spine) |
+| `racks.tf` | Rack types (compute and border) |
+| `template.tf` | Rack-based blueprint template |
+| `blueprint.tf` | Blueprint, device allocation, and deployment |
+| `erb_vrf.tf` | VRFs (Routing Zones) and default route Connectivity Templates |
+| `erb_vn.tf` | Virtual Networks (VXLANs) and tagged Connectivity Templates |
+| `generic-systems.tf` | Generic systems (servers, firewall) with LACP LAG |
+| `terraform.tfvars` | Service definitions: VRFs, VNs, generic systems |
 
-## Configuration des services
+## Service Configuration
 
-Tous les services sont définis dans `terraform.tfvars` — aucune modification des fichiers `.tf` n'est nécessaire pour ajouter des VRFs, VNs ou generic systems.
+All services are defined in `terraform.tfvars` — no changes to `.tf` files are needed to add VRFs, VNs, or generic systems.
 
 ### VRFs
+
+Each VRF (Routing Zone) has a **default route configured on the border leafs pointing to the firewall**. This ensures that all inter-VRF or north-south traffic is forwarded to the firewall for inspection before leaving the fabric.
 
 ```hcl
 vrfs = [
   {
     name                   = "Blue_VRF"
-    default_route_next_hop = "10.0.10.254"         # Next-hop FW
+    default_route_next_hop = "10.0.10.254"    # Firewall IP in this VRF
     default_route_leaf     = ["terraform_border_001_leaf1", "terraform_border_001_leaf2"]
   },
 ]
 ```
+
+Apstra automatically generates a System Connectivity Template per VRF that injects this static default route (`0.0.0.0/0`) into the VRF routing table on the specified border leafs.
 
 ### Virtual Networks (VXLANs)
 
@@ -108,7 +112,7 @@ vns = [
 ]
 ```
 
-### Generic Systems (serveurs / équipements)
+### Generic Systems (servers / appliances)
 
 ```hcl
 generic_systems = [
@@ -124,7 +128,7 @@ generic_systems = [
         group_label                   = "bond0"
         lag_mode                      = "lacp_active"
       },
-      # Deuxième lien pour ESI-LAG (multi-homing)
+      # Second link for ESI-LAG (multi-homing)
       { ... }
     ]
     vns = ["Vlan-100", "Vlan-200"]
@@ -132,25 +136,25 @@ generic_systems = [
 ]
 ```
 
-## Pools de ressources créés
+## Resource Pools
 
-| Pool | Type | Plage |
+| Pool | Type | Range |
 |------|------|-------|
 | Terraform-Loopback | IPv4 | 10.0.0.0/24 |
 | Terraform-Link | IPv4 | 10.1.0.0/24 |
 | Terraform-ASN | ASN | 65100–65199 |
 | Terraform-vni | VNI | 10000–19999 |
 
-## Services déployés (valeurs par défaut)
+## Deployed Services (default values)
 
-| VRF | VLAN | Subnet | Gateway | Bound to |
-|-----|------|--------|---------|----------|
-| Blue_VRF | 100 | 10.0.100.0/24 | 10.0.100.1 | compute leaf1 |
-| Red_VRF | 200 | 10.0.200.0/24 | 10.0.200.1 | compute leaf1 |
-| Blue_VRF | 10 | 10.0.10.0/24 | 10.0.10.1 | border leaf1 |
-| Red_VRF | 20 | 10.0.20.0/24 | 10.0.20.1 | border leaf1 |
+| VRF | VLAN | Subnet | Gateway | Default Route Next-Hop | Bound to |
+|-----|------|--------|---------|------------------------|----------|
+| Blue_VRF | 100 | 10.0.100.0/24 | 10.0.100.1 | 10.0.10.254 (FW) | compute leaf1 |
+| Red_VRF  | 200 | 10.0.200.0/24 | 10.0.200.1 | 10.0.20.254 (FW) | compute leaf1 |
+| Blue_VRF | 10  | 10.0.10.0/24  | 10.0.10.1  | 10.0.10.254 (FW) | border leaf1  |
+| Red_VRF  | 20  | 10.0.20.0/24  | 10.0.20.1  | 10.0.20.254 (FW) | border leaf1  |
 
-## Sécurité
+## Security
 
-- `terraform.secrets.tfvars` est exclu du dépôt git (voir `.gitignore`)
-- Les fichiers d'état Terraform (`.tfstate`) sont également exclus — utiliser un backend distant (S3, Terraform Cloud) en production
+- `terraform.secrets.tfvars` is excluded from the git repository (see `.gitignore`)
+- Terraform state files (`.tfstate`) are also excluded — use a remote backend (S3, Terraform Cloud) in production
