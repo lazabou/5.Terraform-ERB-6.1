@@ -1,0 +1,9 @@
+# Secret Apstra - jamais sur GitHub
+terraform.secrets.tfvars
+
+# Fichiers générés par Terraform - jamais sur GitHub
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
