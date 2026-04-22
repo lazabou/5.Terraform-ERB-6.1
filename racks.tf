@@ -1,5 +1,5 @@
 resource "apstra_rack_type" "terraform-compute" {
-  name                       = "Terraform-compute"
+  name                       = "terraform-compute"
   fabric_connectivity_design = "l3clos"
 
   leaf_switches = {
@@ -13,7 +13,7 @@ resource "apstra_rack_type" "terraform-compute" {
 }
 
 resource "apstra_rack_type" "terraform-border" {
-  name                       = "Terraform-border"
+  name                       = "terraform-border"
   fabric_connectivity_design = "l3clos"
 
   leaf_switches = {

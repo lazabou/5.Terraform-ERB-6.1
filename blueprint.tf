@@ -41,10 +41,10 @@ locals {
   apstra_node_names = {
     Spine1  = "spine1"
     Spine2  = "spine2"
-    Border1 = "${lower(replace(apstra_rack_type.terraform-border.name, "-", "_"))}_001_leaf1"
-    Border2 = "${lower(replace(apstra_rack_type.terraform-border.name, "-", "_"))}_001_leaf2"
-    Leaf1   = "${lower(replace(apstra_rack_type.terraform-compute.name, "-", "_"))}_001_leaf1"
-    Leaf2   = "${lower(replace(apstra_rack_type.terraform-compute.name, "-", "_"))}_001_leaf2"
+    Border1 = "${replace(apstra_rack_type.terraform-border.name, "-", "_")}_001_leaf1"
+    Border2 = "${replace(apstra_rack_type.terraform-border.name, "-", "_")}_001_leaf2"
+    Leaf1   = "${replace(apstra_rack_type.terraform-compute.name, "-", "_")}_001_leaf1"
+    Leaf2   = "${replace(apstra_rack_type.terraform-compute.name, "-", "_")}_001_leaf2"
   }
 
   asn_pools = {
