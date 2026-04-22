@@ -32,6 +32,10 @@ variable "device_keys" {
   type = map(string)
 }
 
+variable "blueprint_name" {
+  type = string
+}
+
 variable "nodes" {
   description = "Node definitions: Apstra internal name, UI label, and hostname"
   type = map(object({

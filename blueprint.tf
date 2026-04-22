@@ -1,7 +1,7 @@
 
 # Instantiate a blueprint from the previously-created template
 resource "apstra_datacenter_blueprint" "terraform-pod1" {
-  name        = "Terraform-pod1"
+  name        = var.blueprint_name
   template_id = apstra_template_rack_based.terraform-template.id
   depends_on = [
     apstra_logical_device.ld,

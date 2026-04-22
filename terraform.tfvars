@@ -1,3 +1,5 @@
+blueprint_name = "Terraform-pod1"
+
 nodes = {
   Spine1  = { apstra_name = "spine1",                      label = "Spine1",  hostname = "Spine1"  }
   Spine2  = { apstra_name = "spine2",                      label = "Spine2",  hostname = "Spine2"  }
