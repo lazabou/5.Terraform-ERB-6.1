@@ -58,6 +58,9 @@ data "apstra_datacenter_systems" "default_route_leafs" {
   filters = [{
     label = each.key
   }]
+
+  # Must be read after device allocation so node labels are already set to friendly names
+  depends_on = [apstra_datacenter_device_allocation.assign_devices]
 }
 
 
