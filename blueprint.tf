@@ -106,7 +106,7 @@ resource "apstra_datacenter_device_allocation" "assign_devices" {
     hostname    = var.nodes[each.key].hostname
   }
 
-  # device_key = each.value.device_key
+  device_key = each.value.device_key
 
   # Logical devices and interface maps must exist before device assignment
   depends_on = [
