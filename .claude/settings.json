@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(terraform plan *)",
+      "Bash(terraform init *)",
+      "Bash(terraform state list *)",
+      "Bash(terraform state show *)",
+      "Bash(terraform state list)",
+      "Bash(tar -tzf *)",
+      "Bash(curl -sk *)"
+    ]
+  }
+}
