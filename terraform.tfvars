@@ -72,6 +72,14 @@ vns = [
     ipv4_subnet          = "10.0.20.0/24"
     bindings             = ["Border1"]
   },
+  {
+    name                 = "Vlan-150"
+    vlan_id              = 150
+    vrf_name             = "Blue_VRF"
+    ipv4_virtual_gateway = "10.0.150.1"
+    ipv4_subnet          = "10.0.150.0/24"
+    bindings             = ["Leaf1", "Leaf2"]
+  },
 ]
 
 generic_systems = [
@@ -118,6 +126,28 @@ generic_systems = [
       },
     ]
     vns = ["Vlan-100", "Vlan-200"]
+  },
+  {
+    name      = "Server_Git"
+    hostname  = "Server-Git"
+    link_tags = ["server_git"]
+    links = [
+      {
+        leaf_label                    = "Leaf1"
+        target_switch_if_name         = "xe-0/0/20"
+        target_switch_if_transform_id = 2
+        group_label                   = "bond0"
+        lag_mode                      = "lacp_active"
+      },
+      {
+        leaf_label                    = "Leaf2"
+        target_switch_if_name         = "xe-0/0/20"
+        target_switch_if_transform_id = 2
+        group_label                   = "bond0"
+        lag_mode                      = "lacp_active"
+      },
+    ]
+    vns = ["Vlan-150"]
   },
   {
     name      = "FW"
