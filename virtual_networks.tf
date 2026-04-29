@@ -10,9 +10,9 @@ variable "vns" {
     name                 = string
     vlan_id              = number
     vrf_name             = string
-    ipv4_virtual_gateway = string
-    ipv4_subnet          = string
-    bindings             = list(string)  # noms des leafs
+    ipv4_virtual_gateway = optional(string)
+    ipv4_subnet          = optional(string)
+    bindings             = list(string)
   }))
 }
 
@@ -52,8 +52,8 @@ resource "apstra_datacenter_virtual_network" "vns" {
   blueprint_id                 = apstra_datacenter_blueprint.terraform-pod1.id
   name                         = each.value.name
   type                         = "vxlan"
-  ipv4_connectivity_enabled    = true
-  ipv4_virtual_gateway_enabled = true
+  ipv4_connectivity_enabled    = each.value.ipv4_subnet != null
+  ipv4_virtual_gateway_enabled = each.value.ipv4_virtual_gateway != null
 
   routing_zone_id      = apstra_datacenter_routing_zone.vrfs[each.value.vrf_name].id
   ipv4_virtual_gateway = each.value.ipv4_virtual_gateway
