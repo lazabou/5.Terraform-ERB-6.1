@@ -7,6 +7,7 @@ variable "generic_systems" {
     name       = string
     hostname   = string
     link_tags  = list(string)
+    tags       = optional(set(string), [])
 
     links = list(object({
       leaf_label                    = string
@@ -66,6 +67,7 @@ resource "apstra_datacenter_generic_system" "systems" {
   blueprint_id = apstra_datacenter_blueprint.terraform-pod1.id
   name         = each.value.name
   hostname     = each.value.hostname
+  tags         = length(each.value.tags) > 0 ? each.value.tags : null
 
   depends_on = [
     apstra_logical_device.ld,
