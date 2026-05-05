@@ -170,7 +170,7 @@ resource "apstra_datacenter_configlet" "gbp" {
   blueprint_id         = apstra_datacenter_blueprint.terraform-pod1.id
   catalog_configlet_id = apstra_configlet.gbp[0].id
   condition            = "label in ['Leaf1', 'Leaf2']"
-  name                 = "GBP-2"
+  name                 = "GBP"
 
   depends_on = [
     apstra_configlet.gbp,
